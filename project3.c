@@ -15,7 +15,7 @@ unsigned char rdy[]={0x6E, 0x5E, 0x50};
 unsigned char one_LED[]={0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
  
 volatile unsigned int game_MODE = 0;
-volatile unsigned int game_TIME = 1000;//¿ø·¡ 6000
+volatile unsigned int game_TIME = 1000;//ì›ë˜ 6000
 volatile unsigned int score=0;
 volatile unsigned int cnt1=0;
 volatile unsigned int cnt2=0;
@@ -23,10 +23,10 @@ volatile unsigned int click=0;
  
  
  
-ISR(INT4_vect)// SW1 µ¿ÀÛ¸ğµå ¼³Á¤
+ISR(INT4_vect)// SW1 ë™ì‘ëª¨ë“œ ì„¤ì •
 { 
 	cli();
-	game_MODE=1;//°ÔÀÓ½ºÅ¸Æ®
+	game_MODE=1;//ê²Œì„ìŠ¤íƒ€íŠ¸
 	_delay_ms(100);
 	sei();
 }
@@ -35,7 +35,7 @@ ISR(INT5_vect)
 {
 	cli();
 	if(click == 0){
-	click=1;	// Áßº¹Å¬¸¯ Ä«¿îÆ®
+	click=1;	// ì¤‘ë³µí´ë¦­ ì¹´ìš´íŠ¸
 	score += 10;
 	}
 	_delay_ms(30);
@@ -52,7 +52,7 @@ void RDY() // FND ready
 		}
 }
  
-void display(int n) //FND µğ½ºÇÃ·¹ÀÌ ÇÔ¼ö
+void display(int n) //FND ë””ìŠ¤í”Œë ˆì´ í•¨ìˆ˜
 {
 int fnd[4];
 	 fnd[0]=(n/1)%10;
@@ -76,7 +76,7 @@ int fnd[4];
 	 }
 }
  
-void game_TIME_reduce() //½Ã°£°¨¼ÒÇÔ¼ö
+void game_TIME_reduce() //ì‹œê°„ê°ì†Œí•¨ìˆ˜
 {
 	if(++cnt1 == 10)
 	{
@@ -86,9 +86,9 @@ void game_TIME_reduce() //½Ã°£°¨¼ÒÇÔ¼ö
 	}
 }
  
-void rand_LED()	//·£´ıLEDÇÔ¼ö
+void rand_LED()	//ëœë¤LEDí•¨ìˆ˜
 {
-		if(++cnt2 == 1000)//OVF 1000¹ø´ç ÇÑ¹ø ÀÛµ¿ = 1ÃÊ
+		if(++cnt2 == 1000)//OVF 1000ë²ˆë‹¹ í•œë²ˆ ì‘ë™ = 1ì´ˆ
 		{
 			cnt2=0;
  
@@ -96,10 +96,20 @@ void rand_LED()	//·£´ıLEDÇÔ¼ö
 			PORTA=one_LED[i];
  
 			if(click == 0 && score != 0 )
-			score -= 10; // Á¡¼ö °¨¼Ò
+			score -= 10; // ì ìˆ˜ ê°ì†Œ
  
 			if(click == 0)
-			PORTA=0xFF; //¹İÀÀ½ÇÆĞ½Ã LEDÁ¡µî
+			{
+			PORTG=0x00;
+			PORTA=0xFF; //ë°˜ì‘ì‹¤íŒ¨ì‹œ LEDì ë©¸
+			_delay_ms(250);
+			PORTA=0x00;
+			_delay_ms(250);
+			PORTA=0xFF;
+			_delay_ms(250);
+			PORTA=0x00;
+			_delay_ms(250);
+			}
  
 			click = 0;
 		}
@@ -115,10 +125,10 @@ ISR(TIMER0_OVF_vect) // OVERFLOW/////////
 	if(game_MODE == 1)
 	rand_LED();
  
-	if(game_TIME == 0)//½Ã°£ 0ÃÊ½Ã °ÔÀÓ ³¡
+	if(game_TIME == 0)//ì‹œê°„ 0ì´ˆì‹œ ê²Œì„ ë
 	game_MODE = 2;
  
-	if(click == 1)	//¹İÀÀ ¼º°ø½Ã LED ¼Òµî
+	if(click == 1)	//ë°˜ì‘ ì„±ê³µì‹œ LED ì†Œë“±
 	PORTA=0x00;
  
 }
