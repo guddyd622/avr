@@ -20,7 +20,7 @@ volatile unsigned int score=0;
 volatile unsigned int cnt1=0;
 volatile unsigned int cnt2=0;
 volatile unsigned int click=0;
- 
+volatile unsigned int Rseed=0;
  
  
 ISR(INT4_vect)// SW1 동작모드 설정
@@ -91,7 +91,7 @@ void rand_LED()	//랜덤LED함수
 		if(++cnt2 == 1000)//OVF 1000번당 한번 작동 = 1초
 		{
 			cnt2=0;
- 
+ 			srand(Rseed);
 			int i = rand()%8; //i set rand(0~7)
 			PORTA=one_LED[i];
  
@@ -130,7 +130,9 @@ ISR(TIMER0_OVF_vect) // OVERFLOW/////////
  
 	if(click == 1)	//반응 성공시 LED 소등
 	PORTA=0x00;
- 
+
+	if(click == 0)	//반응속도에 따라서 시드 변경
+	Rseed++;
 }
  
 void init()
