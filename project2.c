@@ -19,12 +19,12 @@ volatile unsigned int ctrl_state = 0;//		Idle / auto / manual
 volatile unsigned int MANUAL_ctrl = 0;//	off / F0 / 0F / VENT
 volatile unsigned int CDS = 0;
 
-ISR(INT4_vect)// SW1 µ¿ÀÛ¸ğµå ¼³Á¤ ½ºÀ§Ä¡ 1: Ã¹ ½ÃÀÛ, ÀÚµ¿ ¡ê ¼öµ¿ ¸ğµå ÀüÈ¯.
+ISR(INT4_vect)// SW1 ë™ì‘ëª¨ë“œ ì„¤ì • ìŠ¤ìœ„ì¹˜ 1: ì²« ì‹œì‘, ìë™ â†” ìˆ˜ë™ ëª¨ë“œ ì „í™˜.
 { 
 	cli();
 	if(ctrl_state == 0||ctrl_state == 2){
 		ctrl_state = 1; 
-		printf("AUTO MODE\n"); //"MANUAL MODE" ¶Ç´Â "AUTO MODE" ¸Ş½ÃÁö Àü¼Û.
+		printf("AUTO MODE\n"); //"MANUAL MODE" ë˜ëŠ” "AUTO MODE" ë©”ì‹œì§€ ì „ì†¡.
 		EIMSK=0x10;
 		}
 	else if(ctrl_state == 1){
@@ -32,16 +32,16 @@ ISR(INT4_vect)// SW1 µ¿ÀÛ¸ğµå ¼³Á¤ ½ºÀ§Ä¡ 1: Ã¹ ½ÃÀÛ, ÀÚµ¿ ¡ê ¼öµ¿ ¸ğµå ÀüÈ¯.
 		printf("MANUAL MODE\n");
 		EIMSK=0x30;
 		}
-	_delay_ms(100);
+	_delay_ms(50);
 	sei();
 }
 
-ISR(INT5_vect) //¼öµ¿ ¸ğµå¿¡¼­ LED(0~3/4~7) ¹× DC¸ğÅÍ¸¦ Á÷Á¢ ÄÑ°Å³ª ²û.
+ISR(INT5_vect) //ìˆ˜ë™ ëª¨ë“œì—ì„œ LED(0~3/4~7) ë° DCëª¨í„°ë¥¼ ì§ì ‘ ì¼œê±°ë‚˜ ë”.
 {
 	cli();
 	if(MANUAL_ctrl == 0){
 		MANUAL_ctrl = 1;
-		printf("MANUAL LED F0\n");//LED »óÅÂ º¯°æ ½Ã, º¯°æ »óÅÂ¸¦ ½Ã¸®¾ó Åë½ÅÀ¸·Î Àü¼Û
+		printf("MANUAL LED F0\n");//LED ìƒíƒœ ë³€ê²½ ì‹œ, ë³€ê²½ ìƒíƒœë¥¼ ì‹œë¦¬ì–¼ í†µì‹ ìœ¼ë¡œ ì „ì†¡
 		}
 	else if(MANUAL_ctrl == 1){
 		MANUAL_ctrl = 2;
@@ -55,7 +55,7 @@ ISR(INT5_vect) //¼öµ¿ ¸ğµå¿¡¼­ LED(0~3/4~7) ¹× DC¸ğÅÍ¸¦ Á÷Á¢ ÄÑ°Å³ª ²û.
 		MANUAL_ctrl = 0;
 		printf("MANUAL OFF\n");
 		}
-	_delay_ms(100);
+	_delay_ms(50);
 	sei();
 }
 
@@ -86,7 +86,7 @@ unsigned short read_ADC()//ADC read
 	return value;
 }
 
-void display(int cnt) //FND µğ½ºÇÃ·¹ÀÌ ÇÔ¼ö
+void display(int cnt) //FND ë””ìŠ¤í”Œë ˆì´ í•¨ìˆ˜
 {
 int fnd[4];
 	 fnd[0]=(cnt/1)%10;
@@ -110,33 +110,33 @@ void LED_ctrl(int n)
 {
 	if(n<LED_level){
 		if(PORTA == 0x00)
-		printf("LIGHT ON\n");	//"LIGHT ON" ¸Ş½ÃÁö Àü¼Û
-		PORTA=0x0F;		//¹Ì¸¸ÀÌ¸é : LED0~LED3 Á¡µî.
+		printf("LIGHT ON\n");	//"LIGHT ON" ë©”ì‹œì§€ ì „ì†¡
+		PORTA=0x0F;		//ë¯¸ë§Œì´ë©´ : LED0~LED3 ì ë“±.
 	}
 	else if(n<VENT_level){
 		if(PORTA == 0x0F)
-		printf("LIGHT OFF\n");	//"LIGHT OFF" ¸Ş½ÃÁö Àü¼Û.
-		PORTA=0x00;		//ÀÌ»óÀÌ¸é:LED0~LED3 ²¨Áü.
+		printf("LIGHT OFF\n");	//"LIGHT OFF" ë©”ì‹œì§€ ì „ì†¡.
+		PORTA=0x00;		//ì´ìƒì´ë©´:LED0~LED3 êº¼ì§.
 	}
 }
 
 void VENT_ctrl(int n)
 {
 	if(n>VENT_level){
-	PORTA=0xF0;		//ÀÌ»óÀÌ¸é:LED4~LED7 Á¡µî.
+	PORTA=0xF0;		//ì´ìƒì´ë©´:LED4~LED7 ì ë“±.
 	if(PORTB==0x00)
-	printf("VENT ON\n");	//"VENT ON" ¸Ş½ÃÁö Àü¼Û.
-	PORTB=0x70;		//¸ğÅÍ: ¼±Ç³±â ON
+	printf("VENT ON\n");	//"VENT ON" ë©”ì‹œì§€ ì „ì†¡.
+	PORTB=0x70;		//ëª¨í„°: ì„ í’ê¸° ON
 	}
 	else if(n>LED_level){
 	PORTA=0x00;
-	if(PORTB==0x70)		//¸ğÅÍ: ¼±Ç³±â ON
-	printf("VENT OFF\n");	//"VENT OFF" ¸Ş½ÃÁö Àü¼Û.
-	PORTB=0x00;		//¸ğÅÍ: ¼±Ç³±â OFF
+	if(PORTB==0x70)		//ëª¨í„°: ì„ í’ê¸° ON
+	printf("VENT OFF\n");	//"VENT OFF" ë©”ì‹œì§€ ì „ì†¡.
+	PORTB=0x00;		//ëª¨í„°: ì„ í’ê¸° OFF
 	}
 }
 
-void VENT_manual(int n)//¸ğÅÍ Á¦¾îÇÔ¼ö
+void VENT_manual(int n)//ëª¨í„° ì œì–´í•¨ìˆ˜
 {
 	if(n==0)
 		PORTB=0x00;
@@ -145,7 +145,7 @@ void VENT_manual(int n)//¸ğÅÍ Á¦¾îÇÔ¼ö
 }
 
 
-void init()//¼ÂÆÃ
+void init()//ì…‹íŒ…
 {
 	DDRA = 0xFF;
 	DDRB = 0x70; // MOTOR_IN_1
@@ -176,7 +176,7 @@ int main()
 	stdout = &mystdout;
 	PORTG=0x0F;
 	
-	printf("IDLE\n");	//"IDLE" »óÅÂ ¸Ş½ÃÁö Àü¼Û
+	printf("IDLE\n");	//"IDLE" ìƒíƒœ ë©”ì‹œì§€ ì „ì†¡
 	
 		while(1)
 		{
