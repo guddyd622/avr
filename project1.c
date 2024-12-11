@@ -64,17 +64,6 @@ void reset1()
 	count=0;	
 }
  
-void init(){					// MCU 초기 레지스터 설정
-	DDRC=0xff;				// DDRC,DDRG ( FND ) DDRA ( LED )
-	DDRG=0x0f;				// DDRE ( SW 1,2 입력으로 설정 ) EIMSK ( interrupt 4,5 활성화 )
-	DDRA=0xff;				// EICRB ( 인터럽트 low edge 시 발생 )
-	DDRE=0xcf;				// SREG ( 전역 인터럽트 사용 선언 )
-	EIMSK=0x30;				// sei ( 인터럽트 시작 )
-	EICRB=0x0A;
-	SREG=0x08;
-	sei();
-	}
- 
 void ansLED()
 {			
 	int i=0;
@@ -191,6 +180,18 @@ void setup()
 		_delay_ms(2);
 	}
 }
+
+void init(){
+	DDRA=0xff;
+	DDRC=0xff;
+	DDRG=0x0f;
+	DDRE=0xcf;
+	
+	EIMSK=0x30;
+	EICRB=0x0A;
+	SREG=0x08;
+	sei();
+	}
 
 int main()
 {
