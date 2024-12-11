@@ -169,8 +169,8 @@ void init()//셋팅
 	ADMUX = 0x00;//MUX-ADC0(CDS)
 	ADCSRA = 0x87;//ADC ENA  Prescaler 128
 
-	printf("IDLE\n");
 	stdout = &mystdout;
+	printf("IDLE\n");
 }
 
 int main()
@@ -180,14 +180,14 @@ int main()
 		while(1)
 		{
 			CDS=read_ADC();	
-			display(CDS);
-
+			
 			if(ctrl_state == 1){
 				LED_ctrl(CDS);
 				VENT_ctrl(CDS);
+				display(CDS);
 			}
 			else if(ctrl_state == 2){
-				
+				display(CDS);
 				switch(MANUAL_ctrl){
  
 				case 0:
