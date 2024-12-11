@@ -2,29 +2,29 @@
 #include <avr/interrupt.h>
 #define F_CPU 16000000UL
 #include <util/delay.h>
-#define state_lock 0																	//	mcu ÃÊ±â»óÅÂ lock
-#define state_solve 1																	//	sw1ÀÌ ÀÔ·ÂµÆÀ» ½Ã »óÅÂ solve(ºñ¹Ğ¹øÈ£ ÀÔ·ÂÃ¢)
+#define state_lock 0			//	mcu ì´ˆê¸°ìƒíƒœ lock
+#define state_solve 1			//	sw1ì´ ì…ë ¥ëì„ ì‹œ ìƒíƒœ solve(ë¹„ë°€ë²ˆí˜¸ ì…ë ¥ì°½)
 #define state_ans 2
-																						//	ºñ¹Ğ¹øÈ£ ÀÔ·Â ÈÄ °á°ú»óÅÂ
-unsigned char LOCK[4]={0x38, 0x3f, 0x39, 0x70};											//	LOCK FND
-unsigned char digit[11]={0x40,0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7c,0x07,0x7f,0x67};		//	FND 0~9,ÃÊ±â»óÅÂ - Ç¥½Ã
-unsigned char fnd_sel[4]={0x08,0x04,0x02,0x01};											//	FND select
-unsigned char open[4]={0x3f,0x73,0x79,0x54};											//	OPEN FND
-unsigned char fail[4]={0x71,0x77,0x06,0x38};											//	FAIL FND
-volatile int password=1234;																//	ÃÊ±â ºñ¹Ğ¹øÈ£
-volatile int password_count[4];															//	ºñ¹Ğ¹øÈ£ ÀÔ·Â¹Ş´Â °ª
-volatile int state=state_lock;															//	ÃÊ±â mcu »óÅÂ
-volatile int count=0;																	//	ÃÊ±â count »óÅÂ
-volatile int selcount=0;																//	ÃÊ±â selcount(fnd ÀÚ¸®¼±ÅÃ ÇÔ¼ö)
-volatile int reset=0;																	//	ÃÊ±âÈ­¸é¿¡¼­ ¸ğµç count¿Í selcount ÃÊ±âÈ­
+											//	ë¹„ë°€ë²ˆí˜¸ ì…ë ¥ í›„ ê²°ê³¼ìƒíƒœ
+unsigned char LOCK[4]={0x38, 0x3f, 0x39, 0x70};						//	LOCK FND
+unsigned char digit[11]={0x40,0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7c,0x07,0x7f,0x67};	//	FND 0~9,ì´ˆê¸°ìƒíƒœ - í‘œì‹œ
+unsigned char fnd_sel[4]={0x08,0x04,0x02,0x01};						//	FND select
+unsigned char open[4]={0x3f,0x73,0x79,0x54};						//	OPEN FND
+unsigned char fail[4]={0x71,0x77,0x06,0x38};						//	FAIL FND
+volatile int password=1234;		//	ì´ˆê¸° ë¹„ë°€ë²ˆí˜¸
+volatile int password_count[4];		//	ë¹„ë°€ë²ˆí˜¸ ì…ë ¥ë°›ëŠ” ê°’
+volatile int state=state_lock;		//	ì´ˆê¸° mcu ìƒíƒœ
+volatile int count=0;			//	ì´ˆê¸° count ìƒíƒœ
+volatile int selcount=0;		//	ì´ˆê¸° selcount(fnd ìë¦¬ì„ íƒ í•¨ìˆ˜)
+volatile int reset=0;			//	ì´ˆê¸°í™”ë©´ì—ì„œ ëª¨ë“  countì™€ selcount ì´ˆê¸°í™”
  
  
  
-ISR(INT5_vect)																			//	sw2 ÀÔ·Â½Ã count°¡ Áõ°¡ÇÏ¸ç, 
-{																						//	4ÀÚ¸® ¹è¿­ password_count¿¡ count°ªÀ» ÀÔ·Â
-	cli();																				//	count°¡ 10ÀÌµÇ¸é 0À¸·Î ÃÊ±âÈ­
-	count++;																			//	¶ÇÇÑ resetÀ» ½ÃÅ°Áö ¾Ê±âÀ§ÇØ reset°ª 0À¸·Î ÃÊ±âÈ­
-	password_count[selcount]=count;														//	chattering À§ÇÑ delay
+ISR(INT5_vect)					//	sw2 ì…ë ¥ì‹œ countê°€ ì¦ê°€í•˜ë©°, 
+{						//	4ìë¦¬ ë°°ì—´ password_countì— countê°’ì„ ì…ë ¥
+	cli();					//	countê°€ 10ì´ë˜ë©´ 0ìœ¼ë¡œ ì´ˆê¸°í™”
+	count++;				//	ë˜í•œ resetì„ ì‹œí‚¤ì§€ ì•Šê¸°ìœ„í•´ resetê°’ 0ìœ¼ë¡œ ì´ˆê¸°í™”
+	password_count[selcount]=count;		//	chattering ìœ„í•œ delay
 	if(count==10)
 	{
 	count=0;
@@ -35,12 +35,12 @@ ISR(INT5_vect)																			//	sw2 ÀÔ·Â½Ã count°¡ Áõ°¡ÇÏ¸ç,
 }
  
  
-ISR(INT4_vect)																			//	sw1 ÀÔ·Â ½Ã MCUÀÇ ÃÊ±â lock»óÅÂ¿¡¼­ solve»óÅÂ·Î
-{																						//	¸¸¾à solve»óÅÂ¿¡¼­ sw1ÀÌ ÀÔ·ÂµÇ¸é
- 	cli();																				//	selcount°¡ ¿Ã¶ó°¡¸ç FNDÀÇ ÀÚ¸´¼ö º¯°æ
-	if(state==state_lock)																//	sw1ÀÌ 5¹ø ÀÔ·ÂµÇ¸é MCU´Â ans»óÅÂ·Î º¯°æ
-	{																					//	¸¸¾à sw1ÀÌ 6¹øÀÔ·ÂµÇ¸é ÃÊ±â»óÅÂ·Î ´Ù½Ã µ¹ÀÔ
-	state = state_solve;																// 	chattering À§ÇÑ delay
+ISR(INT4_vect)					//	sw1 ì…ë ¥ ì‹œ MCUì˜ ì´ˆê¸° lockìƒíƒœì—ì„œ solveìƒíƒœë¡œ
+{						//	ë§Œì•½ solveìƒíƒœì—ì„œ sw1ì´ ì…ë ¥ë˜ë©´
+ 	cli();					//	selcountê°€ ì˜¬ë¼ê°€ë©° FNDì˜ ìë¦¿ìˆ˜ ë³€ê²½
+	if(state==state_lock)			//	sw1ì´ 5ë²ˆ ì…ë ¥ë˜ë©´ MCUëŠ” ansìƒíƒœë¡œ ë³€ê²½
+	{					//	ë§Œì•½ sw1ì´ 6ë²ˆì…ë ¥ë˜ë©´ ì´ˆê¸°ìƒíƒœë¡œ ë‹¤ì‹œ ëŒì…
+	state = state_solve;			// 	chattering ìœ„í•œ delay
 	}
 	else
 	{
@@ -62,8 +62,8 @@ ISR(INT4_vect)																			//	sw1 ÀÔ·Â ½Ã MCUÀÇ ÃÊ±â lock»óÅÂ¿¡¼­ solve»óÅ
 }
  
 void reset1()
-{															// resetÇÔ¼ö
-			password_count[3]=0;							// ¸ğµç ºñ¹Ğ¹øÈ£¸¦ ÃÊ±â»óÅÂ·Î º¯È¯
+{							// resetí•¨ìˆ˜
+			password_count[3]=0;		// ëª¨ë“  ë¹„ë°€ë²ˆí˜¸ë¥¼ ì´ˆê¸°ìƒíƒœë¡œ ë³€í™˜
 			password_count[2]=0;
 			password_count[1]=0; 
 			password_count[0]=0;
@@ -71,12 +71,12 @@ void reset1()
 			count=0;	
 }
  
-void init(){													// MCU ÃÊ±â ·¹Áö½ºÅÍ ¼³Á¤
-	DDRC=0xff;													// DDRC,DDRG ( FND ) DDRA ( LED )
-	DDRG=0x0f;													// DDRE ( SW 1,2 ÀÔ·ÂÀ¸·Î ¼³Á¤ ) EIMSK ( interrupt 4,5 È°¼ºÈ­ )
-	DDRA=0xff;													// EICRB ( ÀÎÅÍ·´Æ® low edge ½Ã ¹ß»ı )
-	DDRE=0xcf;													// SREG ( Àü¿ª ÀÎÅÍ·´Æ® »ç¿ë ¼±¾ğ )
-	EIMSK=0x30;													// sei ( ÀÎÅÍ·´Æ® ½ÃÀÛ )
+void init(){					// MCU ì´ˆê¸° ë ˆì§€ìŠ¤í„° ì„¤ì •
+	DDRC=0xff;				// DDRC,DDRG ( FND ) DDRA ( LED )
+	DDRG=0x0f;				// DDRE ( SW 1,2 ì…ë ¥ìœ¼ë¡œ ì„¤ì • ) EIMSK ( interrupt 4,5 í™œì„±í™” )
+	DDRA=0xff;				// EICRB ( ì¸í„°ëŸ½íŠ¸ low edge ì‹œ ë°œìƒ )
+	DDRE=0xcf;				// SREG ( ì „ì—­ ì¸í„°ëŸ½íŠ¸ ì‚¬ìš© ì„ ì–¸ )
+	EIMSK=0x30;				// sei ( ì¸í„°ëŸ½íŠ¸ ì‹œì‘ )
 	EICRB=0x0A;
 	SREG=0x08;
 	sei();
@@ -84,10 +84,10 @@ void init(){													// MCU ÃÊ±â ·¹Áö½ºÅÍ ¼³Á¤
  
 void setup()
 {						
-	reset=0;															// MCU°¡ lock »óÅÂÀÏ ¶§ »ç¿ëµÇ´Â ÇÔ¼ö
-	reset1();													// ¸ğµç count¿Í selcount¸¦ 0À¸·Î ÃÊ±âÈ­
-	int i=0;													// LOCK FND ÀÛµ¿ ( FND¿¡ LOCK ¸¦ ¶ç¿ò )
-	for(i=0;i<4;i++){											// LED0 È°¼ºÈ­ ( LOCK µÊÀ» ¾Ë¸² )
+	reset=0;			// MCUê°€ lock ìƒíƒœì¼ ë•Œ ì‚¬ìš©ë˜ëŠ” í•¨ìˆ˜
+	reset1();			// ëª¨ë“  countì™€ selcountë¥¼ 0ìœ¼ë¡œ ì´ˆê¸°í™”
+	int i=0;			// LOCK FND ì‘ë™ ( FNDì— LOCK ë¥¼ ë„ì›€ )
+	for(i=0;i<4;i++){		// LED0 í™œì„±í™” ( LOCK ë¨ì„ ì•Œë¦¼ )
 		PORTC=LOCK[i];
 		PORTG=fnd_sel[i];
 		PORTA=0x01;
@@ -96,11 +96,11 @@ void setup()
 }
  
  
-void ansLED()													// 
-{																// 
-		int i=0;												// 
-		int k=0;												// 
-		for(k=0;k<250;k++)										// 
+void ansLED()
+{			
+		int i=0;
+		int k=0;	
+		for(k=0;k<250;k++)	
 		{
 			if(k<125){
 			for(i=0;i<4;i++){
@@ -134,22 +134,22 @@ void ansLED()													//
  
  
  
-void solve(){												// solveÇÔ¼ö
- 															// MCU°¡ solve»óÅÂ·Î µ¹ÀÔ ½Ã ÀÛµ¿
+void solve(){			// solveí•¨ìˆ˜
+ 				// MCUê°€ solveìƒíƒœë¡œ ëŒì… ì‹œ ì‘ë™
 	PORTA=0x00;
-	int k=0;												// LED´Â ²¨¹ö¸®°í FNDÀÇ ÀÚ¸´¼ö¿¡ count°ªÀ» ÀÔ·ÂÇÏ¿© password_countÀÇ ¹è¿­°ªÀ» ÁöÁ¤
+	int k=0;		// LEDëŠ” êº¼ë²„ë¦¬ê³  FNDì˜ ìë¦¿ìˆ˜ì— countê°’ì„ ì…ë ¥í•˜ì—¬ password_countì˜ ë°°ì—´ê°’ì„ ì§€ì •
 	int i=0;
 	for(k=0;k<40;k++){
-		if(k<20){														// ¸¸¾à sw1ÀÌ ½ÇÇàµÉ ½Ã FNDÀÇ ÀÚ¸´¼ö°¡ º¯°æµÇ¸ç password_count ¹è¿­À» º¯È¯ÇÏ¿© °ªÀ» ÁöÁ¤
-			for(i=0;i<4;i++)									// for¹®ÀÌ ÇÑ ¹ø ½ÇÇàµÇ¸é 8msÀÇ ½Ã°£ÀÌ °æ°ú µÇ°í reset°ªÀ» 1¾¿ Áõ°¡
+		if(k<20){			// ë§Œì•½ sw1ì´ ì‹¤í–‰ë  ì‹œ FNDì˜ ìë¦¿ìˆ˜ê°€ ë³€ê²½ë˜ë©° password_count ë°°ì—´ì„ ë³€í™˜í•˜ì—¬ ê°’ì„ ì§€ì •
+			for(i=0;i<4;i++)		// forë¬¸ì´ í•œ ë²ˆ ì‹¤í–‰ë˜ë©´ 8msì˜ ì‹œê°„ì´ ê²½ê³¼ ë˜ê³  resetê°’ì„ 1ì”© ì¦ê°€
 			{
 				if(i==selcount)
 				{
 				PORTC=0x00;
 				_delay_ms(2);		
 				}
-				else{										// for¹®ÀÌ 125¹ø ½ÇÇàµÇ¸é 1000ms °¡ °æ°úÇÏ¸ç resetÀÌ 125°¡ µÊ
-				PORTC=digit[password_count[i]];				// for¹®ÀÌ 625¹ø ½ÇÇàµÇ¸é 5000ms °¡ °æ°úÇÏ¿© MCU¸¦ lock»óÅÂ·Î µ¹ÀÔµÇ¸ç ¸ğµç°ª reset
+				else{					// forë¬¸ì´ 125ë²ˆ ì‹¤í–‰ë˜ë©´ 1000ms ê°€ ê²½ê³¼í•˜ë©° resetì´ 125ê°€ ë¨
+				PORTC=digit[password_count[i]];		// forë¬¸ì´ 625ë²ˆ ì‹¤í–‰ë˜ë©´ 5000ms ê°€ ê²½ê³¼í•˜ì—¬ MCUë¥¼ lockìƒíƒœë¡œ ëŒì…ë˜ë©° ëª¨ë“ ê°’ reset
 				PORTG=fnd_sel[i];
 				_delay_ms(2);
 					}
@@ -157,7 +157,7 @@ void solve(){												// solveÇÔ¼ö
 				}
 	else{
 		for(i=0;i<4;i++){
-				PORTC=digit[password_count[i]];				// for¹®ÀÌ 625¹ø ½ÇÇàµÇ¸é 5000ms °¡ °æ°úÇÏ¿© MCU¸¦ lock»óÅÂ·Î µ¹ÀÔµÇ¸ç ¸ğµç°ª reset
+				PORTC=digit[password_count[i]];		// forë¬¸ì´ 625ë²ˆ ì‹¤í–‰ë˜ë©´ 5000ms ê°€ ê²½ê³¼í•˜ì—¬ MCUë¥¼ lockìƒíƒœë¡œ ëŒì…ë˜ë©° ëª¨ë“ ê°’ reset
 				PORTG=fnd_sel[i];
 				_delay_ms(2);
 						}
@@ -177,11 +177,11 @@ void solve(){												// solveÇÔ¼ö
  
 }
  
-void ans()																				// SW1 5¹ø ÀÔ·ÂµÉ ½Ã ÀÔ·Â¹ŞÀº ºñ¹Ğ¹øÈ£¸¦
-{																						// ¼³Á¤ÇÑ ºñ¹Ğ¹øÈ£¿Í ÀÏÄ¡ÇÑÁö ¾Æ´ÑÁö ÆÇ´Ü ÈÄ
-	int passwordinput=0;																// ÀÏÄ¡ ÇÒ °æ¿ì OPENÀ» ¶ç¿ì°í LED2~LED4±îÁö 1ÃÊ´ÜÀ§·Î Áõ°¡ÇÏ¸ç OPENµÊÀ» ¾Ë¸²)
- 																						// ÀÏÄ¡ÇÏÁö ¾ÊÀ» °æ¿ì FAILÀ» ¶ç¿ì°í LED7ÀÌ Á¡¸ê
-	passwordinput=(((password_count[0]-1)*1000)+((password_count[1]-1)*100)				// ¸¸¾à selcount°¡ 5°¡ µÉ °æ¿ì Áï, SW1ÀÌ 6¹ø ´­¸± °æ¿ì MCU¸¦ ÃÊ±â»óÅÂ·Î µ¹ÀÔ
+void ans()										// SW1 5ë²ˆ ì…ë ¥ë  ì‹œ ì…ë ¥ë°›ì€ ë¹„ë°€ë²ˆí˜¸ë¥¼
+{											// ì„¤ì •í•œ ë¹„ë°€ë²ˆí˜¸ì™€ ì¼ì¹˜í•œì§€ ì•„ë‹Œì§€ íŒë‹¨ í›„
+	int passwordinput=0;								// ì¼ì¹˜ í•  ê²½ìš° OPENì„ ë„ìš°ê³  LED2~LED4ê¹Œì§€ 1ì´ˆë‹¨ìœ„ë¡œ ì¦ê°€í•˜ë©° OPENë¨ì„ ì•Œë¦¼)
+ 											// ì¼ì¹˜í•˜ì§€ ì•Šì„ ê²½ìš° FAILì„ ë„ìš°ê³  LED7ì´ ì ë©¸
+	passwordinput=(((password_count[0]-1)*1000)+((password_count[1]-1)*100)		// ë§Œì•½ selcountê°€ 5ê°€ ë  ê²½ìš° ì¦‰, SW1ì´ 6ë²ˆ ëˆŒë¦´ ê²½ìš° MCUë¥¼ ì´ˆê¸°ìƒíƒœë¡œ ëŒì…
 	+((password_count[2]-1)*10)+password_count[3]-1);
 							
 	if(passwordinput==password)																														
